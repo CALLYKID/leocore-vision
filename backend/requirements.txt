@@ -1,0 +1,5 @@
+fastapi<0.100
+uvicorn
+numpy
+pillow
+opencv-python-headless

@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Radiology Image Annotation Tool</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeoCore Vision - Radiology AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <header>
-    <h1>Radiology Image Annotation Tool</h1>
-    <p class="disclaimer">
-      Educational use only. This tool does not provide medical diagnosis.
-    </p>
+    <h1>LeoCore Vision</h1>
+    <p>Upload an X-ray and get AI-driven annotations</p>
   </header>
 
   <main>
-    <input type="file" id="imageUpload" accept="image/*">
-
-    <div class="viewer">
-      <canvas id="imageCanvas"></canvas>
+    <div class="upload-section">
+      <input type="file" id="imageUpload" accept="image/*">
+      <button id="analyzeBtn">Analyze</button>
     </div>
 
-    <section id="infoPanel">
-      <h2>Annotation Explanation</h2>
-      <p id="infoText">Upload an image to begin.</p>
-    </section>
+    <div class="image-preview">
+      <img id="previewImage" alt="X-ray preview" />
+    </div>
+
+    <div class="results">
+      <h2>Analysis Result</h2>
+      <pre id="resultText">No analysis yet.</pre>
+    </div>
   </main>
 
   <script src="script.js"></script>

@@ -1,55 +1,45 @@
-// Replace with your Render backend URL
-const API_URL = "https://leocore-vision.onrender.com/analyze-xray";
+const imageUpload = document.getElementById("imageUpload");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const previewImage = document.getElementById("previewImage");
+const resultText = document.getElementById("resultText");
 
-const uploadInput = document.getElementById("imageUpload");
-const canvas = document.getElementById("imageCanvas");
-const ctx = canvas.getContext("2d");
-const infoText = document.getElementById("infoText");
+// Your Render backend URL
+const BACKEND_URL = "https://leocore-vision.onrender.com/analyze-xray";
 
-uploadInput.addEventListener("change", async function () {
-  const file = this.files[0];
-  if (!file) return;
+let selectedFile = null;
 
-  // Show the image on canvas first
-  const img = new Image();
-  img.onload = function () {
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-  };
-  img.src = URL.createObjectURL(file);
+imageUpload.addEventListener("change", (e) => {
+  selectedFile = e.target.files[0];
+  if (!selectedFile) return;
 
-  // Upload image to backend
+  previewImage.src = URL.createObjectURL(selectedFile);
+});
+
+analyzeBtn.addEventListener("click", async () => {
+  if (!selectedFile) {
+    alert("Please upload an X-ray image first.");
+    return;
+  }
+
+  resultText.textContent = "Analyzing...";
+
   const formData = new FormData();
-  formData.append("file", file);
-
-  infoText.textContent = "Analyzing X-ray, please wait...";
+  formData.append("file", selectedFile);
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(BACKEND_URL, {
       method: "POST",
-      body: formData,
+      body: formData
     });
 
-    if (!response.ok) throw new Error("Backend error");
-
-    const data = await response.json();
-
-    // Draw backend annotations if returned
-    if (data.annotations) {
-      data.annotations.forEach((ann) => {
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
-        ctx.font = "14px Arial";
-        ctx.fillStyle = "red";
-        ctx.fillText(ann.label, ann.x, ann.y - 5);
-      });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
 
-    infoText.textContent = data.message || "Analysis complete!";
+    const data = await response.json();
+    resultText.textContent = JSON.stringify(data, null, 2);
+
   } catch (err) {
-    console.error(err);
-    infoText.textContent = "Error analyzing X-ray.";
+    resultText.textContent = `Analysis failed: ${err.message}`;
   }
 });

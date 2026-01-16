@@ -21,23 +21,18 @@ def root():
 
 @app.post("/analyze-xray")
 async def analyze_xray(file: UploadFile = File(...)):
-    # Read the uploaded image
+    # Read image
     image_bytes = await file.read()
-    image = Image.open(io.BytesIO(image_bytes)).convert("L")  # grayscale
-    image_np = np.array(image)
+    image = Image.open(io.BytesIO(image_bytes)).convert("L")
+    width, height = image.size
 
-    # Basic image processing (educational)
-    # 1. Edge detection
-    edges = cv2.Canny(image_np, 50, 150)
+    # Example: return **fake educational annotations**
+    # Replace this with your external API call later
+    annotations = [
+        {"label": "Humerus", "x": int(width*0.3), "y": int(height*0.5), "note": "Upper arm bone"},
+        {"label": "Radius", "x": int(width*0.5), "y": int(height*0.7), "note": "Forearm bone"},
+        {"label": "Ulna", "x": int(width*0.6), "y": int(height*0.7), "note": "Forearm bone"}
+        # Add as many as you want for demonstration
+    ]
 
-    # 2. Image statistics
-    mean_intensity = float(np.mean(image_np))
-    edge_density = float(np.sum(edges > 0) / edges.size)
-
-    return {
-        "image_stats": {
-            "mean_intensity": mean_intensity,
-            "edge_density": edge_density
-        },
-        "note": "This is an educational analysis only; not medical advice."
-    }
+    return {"annotations": annotations}

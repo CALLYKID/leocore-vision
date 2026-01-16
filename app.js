@@ -3,14 +3,13 @@ const canvas = document.getElementById("imageCanvas");
 const ctx = canvas.getContext("2d");
 const infoText = document.getElementById("infoText");
 
-let annotations = [];
+let annotations = []; // array of {label, x, y, note}
 
 // Upload image and send to backend
 uploadInput.addEventListener("change", async function () {
   const file = this.files[0];
   if (!file) return;
 
-  // Display image on canvas
   const img = new Image();
   img.onload = async function () {
     // Resize canvas to image size
@@ -20,18 +19,18 @@ uploadInput.addEventListener("change", async function () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
 
-    // Send image to backend for analysis
     infoText.textContent = "Analyzing image...";
+
+    // Send image to backend
     annotations = await fetchAnnotations(file);
 
-    // Draw returned annotations
     drawAnnotations();
-    infoText.textContent = "Click on boxes to see details.";
+    infoText.textContent = "Click on arrows or labels to see details.";
   };
   img.src = URL.createObjectURL(file);
 });
 
-// Fetch annotations from your backend
+// Fetch annotations from backend
 async function fetchAnnotations(file) {
   const formData = new FormData();
   formData.append("image", file);
@@ -50,44 +49,52 @@ async function fetchAnnotations(file) {
   }
 }
 
-// Draw boxes and labels
+// Draw arrows and labels
 function drawAnnotations() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Redraw the image
+  const img = new Image();
+  img.src = canvas.toDataURL(); // preserve uploaded image
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+
+    annotations.forEach((ann) => {
+      drawArrowToPoint(ann.x, ann.y, ann.label);
+    });
+  };
+}
+
+// Draw an arrow pointing to (x, y) with a label
+function drawArrowToPoint(x, y, label) {
+  const startX = x + 100; // start arrow slightly offset
+  const startY = y - 100;
+
+  // Draw line
   ctx.strokeStyle = "red";
   ctx.lineWidth = 2;
-  ctx.font = "18px Arial";
-  ctx.fillStyle = "red";
-
-  annotations.forEach((ann) => {
-    // Draw rectangle
-    ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
-
-    // Draw label above rectangle
-    ctx.fillText(ann.label, ann.x, ann.y - 5);
-
-    // Optional: draw arrow pointing to center of rectangle
-    drawArrow(ann.x + ann.width / 2, ann.y + ann.height / 2, ann.x + ann.width / 2, ann.y - 20);
-  });
-}
-
-// Draw a simple arrow from (fromX, fromY) to (toX, toY)
-function drawArrow(fromX, fromY, toX, toY) {
-  const headLength = 10;
-  const angle = Math.atan2(toY - fromY, toX - fromX);
-
   ctx.beginPath();
-  ctx.moveTo(fromX, fromY);
-  ctx.lineTo(toX, toY);
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(x, y);
   ctx.stroke();
 
+  // Draw arrowhead
+  const headLength = 10;
+  const angle = Math.atan2(y - startY, x - startX);
   ctx.beginPath();
-  ctx.moveTo(toX, toY);
-  ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
-  ctx.lineTo(toX, toY);
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - headLength * Math.cos(angle - Math.PI / 6), y - headLength * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(x - headLength * Math.cos(angle + Math.PI / 6), y - headLength * Math.sin(angle + Math.PI / 6));
+  ctx.lineTo(x, y);
+  ctx.fillStyle = "red";
   ctx.fill();
+
+  // Draw label near arrow start
+  ctx.fillStyle = "red";
+  ctx.font = "18px Arial";
+  ctx.fillText(label, startX + 5, startY - 5);
 }
 
-// Handle clicks on annotations
+// Handle clicks
 canvas.addEventListener("click", function (e) {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -95,16 +102,14 @@ canvas.addEventListener("click", function (e) {
 
   let clicked = false;
   annotations.forEach((ann) => {
-    if (
-      x >= ann.x &&
-      x <= ann.x + ann.width &&
-      y >= ann.y &&
-      y <= ann.y + ann.height
-    ) {
+    // detect clicks near arrowhead (20px radius)
+    const dx = x - ann.x;
+    const dy = y - ann.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 20) {
       infoText.textContent = ann.note || ann.label;
       clicked = true;
     }
   });
 
-  if (!clicked) infoText.textContent = "Click on boxes to see details.";
+  if (!clicked) infoText.textContent = "Click on arrows or labels to see details.";
 });

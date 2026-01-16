@@ -1,80 +1,55 @@
+// Replace with your Render backend URL
+const API_URL = "https://leocore-vision.onrender.com/analyze-xray";
+
 const uploadInput = document.getElementById("imageUpload");
 const canvas = document.getElementById("imageCanvas");
 const ctx = canvas.getContext("2d");
 const infoText = document.getElementById("infoText");
 
-const annotations = [
-  {
-    label: "Right Lung Field",
-    x: 100,
-    y: 80,
-    width: 120,
-    height: 200,
-    explanation:
-      "Radiologists examine lung fields for symmetry, clarity, and unusual opacities."
-  },
-  {
-    label: "Left Lung Field",
-    x: 260,
-    y: 80,
-    width: 120,
-    height: 200,
-    explanation:
-      "The left lung field is assessed for normal air distribution and structural landmarks."
-  },
-  {
-    label: "Cardiac Silhouette",
-    x: 190,
-    y: 140,
-    width: 120,
-    height: 120,
-    explanation:
-      "The cardiac silhouette gives an indication of heart size and position."
-  }
-];
-
-uploadInput.addEventListener("change", function () {
+uploadInput.addEventListener("change", async function () {
   const file = this.files[0];
   if (!file) return;
 
+  // Show the image on canvas first
   const img = new Image();
   img.onload = function () {
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
-    drawAnnotations();
   };
   img.src = URL.createObjectURL(file);
-});
 
-function drawAnnotations() {
-  ctx.strokeStyle = "red";
-  ctx.lineWidth = 2;
-  ctx.font = "14px Arial";
-  ctx.fillStyle = "red";
+  // Upload image to backend
+  const formData = new FormData();
+  formData.append("file", file);
 
-  annotations.forEach((ann) => {
-    ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
-    ctx.fillText(ann.label, ann.x, ann.y - 5);
-  });
+  infoText.textContent = "Analyzing X-ray, please wait...";
 
-  infoText.textContent =
-    "Annotated regions highlight anatomical areas commonly reviewed by radiologists.";
-}
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: formData,
+    });
 
-canvas.addEventListener("click", function (e) {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+    if (!response.ok) throw new Error("Backend error");
 
-  annotations.forEach((ann) => {
-    if (
-      x >= ann.x &&
-      x <= ann.x + ann.width &&
-      y >= ann.y &&
-      y <= ann.y + ann.height
-    ) {
-      infoText.textContent = ann.explanation;
+    const data = await response.json();
+
+    // Draw backend annotations if returned
+    if (data.annotations) {
+      data.annotations.forEach((ann) => {
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
+        ctx.font = "14px Arial";
+        ctx.fillStyle = "red";
+        ctx.fillText(ann.label, ann.x, ann.y - 5);
+      });
     }
-  });
+
+    infoText.textContent = data.message || "Analysis complete!";
+  } catch (err) {
+    console.error(err);
+    infoText.textContent = "Error analyzing X-ray.";
+  }
 });

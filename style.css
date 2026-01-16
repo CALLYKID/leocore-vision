@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #0a2540;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.disclaimer {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+main {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.viewer {
+  margin-top: 20px;
+  border: 2px solid #ccc;
+  background: black;
+  text-align: center;
+}
+
+canvas {
+  max-width: 100%;
+}
+
+#infoPanel {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-left: 4px solid #0a2540;
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Radiology Image Annotation Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Radiology Image Annotation Tool</h1>
+    <p class="disclaimer">
+      Educational use only. This tool does not provide medical diagnosis.
+    </p>
+  </header>
+
+  <main>
+    <input type="file" id="imageUpload" accept="image/*">
+
+    <div class="viewer">
+      <canvas id="imageCanvas"></canvas>
+    </div>
+
+    <section id="infoPanel">
+      <h2>Annotation Explanation</h2>
+      <p id="infoText">Upload an image to begin.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

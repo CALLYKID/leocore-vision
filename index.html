@@ -1,32 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LeoCore Vision - Radiology Annotation</title>
-  <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MRI Defender 2D</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Radiology Image Annotation Tool</h1>
-    <p>Educational use only. This tool does not provide medical diagnosis.</p>
-  </header>
-
-  <main>
-    <div class="upload-container">
-      <input type="file" id="imageUpload" accept="image/*">
-    </div>
-
-    <div class="canvas-container">
-      <canvas id="imageCanvas"></canvas>
-    </div>
-
-    <div class="info-panel" id="infoPanel">
-      <h2>Annotation Explanation</h2>
-      <p id="infoText">Upload an X-ray to see annotated regions.</p>
-    </div>
-  </main>
-
-  <script src="app.js"></script>
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">Score: <span id="score">0</span></div>
+    <script src="app.js"></script>
 </body>
 </html>
